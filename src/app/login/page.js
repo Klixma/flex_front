@@ -1,7 +1,8 @@
-"use client";
+"use client"; 
 import React from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import apiBaseUrl from "../../../utils/comp/ip";
 
 function Login() {
   const [emailText, setEmailText] = React.useState([]);
@@ -21,7 +22,7 @@ function Login() {
     try {
       const response = await axios({
         method: "GET",
-        url: `http://localhost:4000/api/user/login?user_email=${emailText}&password=${passText}`,
+        url: `${apiBaseUrl}/user/login?user_email=${emailText}&password=${passText}`,
         headers: {
           "Content-Type": "application/json",
         },
