@@ -169,10 +169,4 @@ function NewItem({ setSelect }) {
   );
 }
 
-NewItem.propTypes = {};
-
-NewItem.defaultProps = {};
-
-NewItem.layout = "Contentlayout";
-
 export default NewItem;

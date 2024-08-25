@@ -14,6 +14,7 @@ import {
 } from "react-bootstrap";
 import NewItem from "./new_item";
 import SearchItem from "./search_item";
+import NavigationBar from "../components/Navigation";
 
 function NSU_Item() {
   const [select, setSelect] = React.useState(false);
@@ -36,7 +37,8 @@ function NSU_Item() {
 
   return (
     <div>
-      <div className="breadcrumb-header justify-content-between">
+      <NavigationBar/>
+      <div className="breadcrumb-header justify-content-between mt-5 pt-3">
         <div className="left-content">
           <span className="main-content-title mg-b-0 mg-b-lg-1">Item</span>
         </div>

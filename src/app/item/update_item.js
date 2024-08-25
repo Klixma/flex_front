@@ -226,10 +226,4 @@ function UpdateItem({ setSelect, id_item }) {
   );
 }
 
-UpdateItem.propTypes = {};
-
-UpdateItem.defaultProps = {};
-
-UpdateItem.layout = "Contentlayout";
-
 export default UpdateItem;
