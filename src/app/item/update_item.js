@@ -12,7 +12,6 @@ import {
   Tooltip,
   Modal,
 } from "react-bootstrap";
-import Swal from "sweetalert2";
 import apiBaseUrl from ".././../../utils/comp/ip";
 import ItemUpdate from "./item_update";
 

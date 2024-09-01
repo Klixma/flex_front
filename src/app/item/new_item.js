@@ -120,6 +120,8 @@ function NewItem({ setSelect }) {
                       <option value="m">m</option>
                       <option value="L">L</option>
                       <option value="kg">kg</option>
+                      <option value="Sqft">Sqft</option>
+                      <option value="l feet">l feet</option>
                     </select>
                   </FormGroup>
 
