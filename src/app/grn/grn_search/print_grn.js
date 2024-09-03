@@ -61,18 +61,28 @@ const GRN = ({ id }) => {
         >
           <div>
             <p>
+              Quotation No: <b>{grnData[0][0]["bill_no"]}</b>
+              <br />
+              Date:{" "}
+              <b>{new Date(grnData[0][0]["date_time"]).toLocaleString()}</b>
+              <br />
+              Purchase Date:{" "}
+              <b>
+                {new Date(grnData[0][0]["purchase_date"]).toLocaleDateString()}
+              </b>
+              <br />
+              PO Number: <b>{grnData[0][0]["po_number"]}</b>
+              <br />
+              Job Number: <b>{grnData[0][0]["job_number"]}</b>
+            </p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <p>
               {grnData[0][0]["supplier_name"]},
               <br />
               {grnData[0][0]["address"]},
               <br />
               {grnData[0][0]["tp_no"]}
-            </p>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <p>
-              Quotation No: {grnData[0][0]["bill_no"]}
-              <br />
-              Date: {new Date(grnData[0][0]["date_time"]).toLocaleString()}
             </p>
           </div>
         </div>

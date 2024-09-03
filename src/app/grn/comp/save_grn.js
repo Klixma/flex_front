@@ -8,6 +8,9 @@ const SaveGRN = async (
   supplier_name,
   supplier_address,
   supplier_tp,
+  purchase_date,
+  po_number,
+  job_number,
   payment_methods
 ) => {
   const user_id = localStorage.getItem("user_id");
@@ -25,6 +28,9 @@ const SaveGRN = async (
     address: supplier_address,
     tp_no: supplier_tp,
     id_users: user_id,
+    purchase_date: purchase_date,
+    po_number: po_number,
+    job_number: job_number,
     grn_item: grnItems,
     payment_methods: payment_methods,
   };
@@ -52,7 +58,7 @@ const SaveGRN = async (
         text: response.data.message,
       }).then(() => {
         // Redirect to the print page
-        // window.location.href = `../search_grn`; // Adjust the redirect URL
+        window.location.href = `grn/grn_search`; // Adjust the redirect URL
       });
     }
   } catch (error) {

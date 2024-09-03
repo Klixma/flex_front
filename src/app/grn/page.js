@@ -22,18 +22,18 @@ function CreateGRN() {
     supplier_name: "",
     supplier_address: "",
     supplier_tp: "",
-    phone_number: "",
-    address: "",
-    description: "",
+    purchase_date: "",
+    po_number: "",
+    job_number: "",
   });
   const {
     bill_no,
     supplier_name,
     supplier_address,
     supplier_tp,
-    phone_number,
-    address,
-    description,
+    purchase_date,
+    po_number,
+    job_number,
   } = data;
   const changeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -43,6 +43,12 @@ function CreateGRN() {
     const tFP = e.target.id;
     if (e.keyCode === 13) {
       tFP == "bill_no"
+        ? document.getElementById("purchase_date").focus()
+        : tFP == "purchase_date"
+        ? document.getElementById("po_number").focus()
+        : tFP == "po_number"
+        ? document.getElementById("job_number").focus()
+        : tFP == "job_number"
         ? document.getElementById("supplier_name").focus()
         : tFP == "supplier_name"
         ? document.getElementById("supplier_address").focus()
@@ -54,94 +60,7 @@ function CreateGRN() {
         ? document.getElementById("address").focus()
         : tFP == "address"
         ? document.getElementById("description").focus()
-        : tFP == "description"
-        ? handleSubmit()
         : "";
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (supplier_name  == "") {
-      Swal.fire({
-        title: "Warning!",
-        allowOutsideClick: false,
-        confirmButtonText: "ok",
-        cancelButtonColor: "#38cab3",
-        text: "Dealer Name is required.",
-      });
-    } else if (supplier_tp == "" || phone_number == "") {
-      Swal.fire({
-        title: "Warning!",
-        allowOutsideClick: false,
-        confirmButtonText: "ok",
-        cancelButtonColor: "#38cab3",
-        text: "One phone number is required.",
-      });
-    } else if (address == "") {
-      Swal.fire({
-        title: "Warning!",
-        allowOutsideClick: false,
-        confirmButtonText: "ok",
-        cancelButtonColor: "#38cab3",
-        text: "Address is required.",
-      });
-    } else {
-      try {
-        const response = await axios.post(
-          `${apiBaseUrl}/delaer/create`,
-          {
-            dealer_name: supplier_name ,
-            dealer_supplier_address: supplier_address,
-            supplier_tp: supplier_tp,
-            phone_number: phone_number,
-            address: address,
-            description: description,
-          },
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          Swal.fire({
-            title: "Well done!",
-            icon: "success",
-            allowOutsideClick: false,
-            confirmButtonText: "ok",
-            cancelButtonColor: "#38cab3",
-            text: response.data.message,
-          });
-        }
-        console.log(response.data);
-      } catch (error) {
-        if (error.response) {
-          if (error.response) {
-            console.error("Response data:", error.response.data);
-            console.error("Response status:", error.response.status);
-            console.error("Response headers:", error.response.headers);
-
-            if (error.response.status === 500) {
-              Swal.fire({
-                title: "Warning!",
-                allowOutsideClick: false,
-                confirmButtonText: "ok",
-                cancelButtonColor: "#38cab3",
-                text: error.response.data.message,
-              });
-            }
-          } else if (error.request) {
-            console.error("No response received. Request:", error.request);
-            alert("No response received from the server.");
-          } else {
-            console.error("Error setting up the request:", error.message);
-            alert("Error: " + error.message);
-          }
-
-          console.error("Error config:", error.config);
-        }
-      }
     }
   };
 
@@ -156,30 +75,85 @@ function CreateGRN() {
     <div>
       <NavigationBar />
       <Row className=" mt-5 pt-4">
-        <Col lg={6} xl={6} md={6} sm={12}>
+        <Col lg={8} xl={8} md={8} sm={12}>
           <Card className="box-shadow-0">
             <Card.Header>
               <h4 className="card-title mb-1">Create GRN</h4>
               <p className="mb-2">You can create new GRN in here.</p>
             </Card.Header>
             <Card.Body className=" pt-0">
-              <FormGroup className="form-group">
-                <Form.Label htmlFor="bill_no">Bill No:</Form.Label>
-                <Form.Control
-                  type="text"
-                  className="form-control"
-                  id="bill_no"
-                  name="bill_no"
-                  placeholder="Bill No"
-                  onChange={changeHandler}
-                  defaultValue={bill_no}
-                  onKeyDown={pressEnter}
-                />
-              </FormGroup>
+              <Row>
+                <Col lg={6} xl={6} md={6} sm={6}>
+                  <FormGroup className="form-group">
+                    <Form.Label htmlFor="bill_no">Bill No:</Form.Label>
+                    <Form.Control
+                      type="text"
+                      className="form-control"
+                      id="bill_no"
+                      name="bill_no"
+                      placeholder="Bill No"
+                      onChange={changeHandler}
+                      defaultValue={bill_no}
+                      onKeyDown={pressEnter}
+                    />
+                  </FormGroup>
+                </Col>
+
+                <Col lg={6} xl={6} md={6} sm={6}>
+                  <FormGroup className="form-group">
+                    <Form.Label htmlFor="purchase_date">
+                      Purchase Date:
+                    </Form.Label>
+                    <Form.Control
+                      type="date"
+                      className="form-control"
+                      id="purchase_date"
+                      name="purchase_date"
+                      placeholder="Purchase Date"
+                      onChange={changeHandler}
+                      defaultValue={purchase_date}
+                      onKeyDown={pressEnter}
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+              <Row>
+                <Col lg={6} xl={6} md={6} sm={6}>
+                  <FormGroup className="form-group">
+                    <Form.Label htmlFor="po_number">PO Number:</Form.Label>
+                    <Form.Control
+                      type="text"
+                      className="form-control"
+                      id="po_number"
+                      name="po_number"
+                      placeholder="PO Number"
+                      onChange={changeHandler}
+                      defaultValue={po_number}
+                      onKeyDown={pressEnter}
+                    />
+                  </FormGroup>
+                </Col>
+
+                <Col lg={6} xl={6} md={6} sm={6}>
+                  <FormGroup className="form-group">
+                    <Form.Label htmlFor="job_number">Job Number:</Form.Label>
+                    <Form.Control
+                      type="text"
+                      className="form-control"
+                      id="job_number"
+                      name="job_number"
+                      placeholder="Job Number"
+                      onChange={changeHandler}
+                      defaultValue={job_number}
+                      onKeyDown={pressEnter}
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
             </Card.Body>
           </Card>
         </Col>
-        <Col lg={6} xl={6} md={6} sm={12}>
+        <Col lg={4} xl={4} md={4} sm={12}>
           <Card className="box-shadow-0">
             <Card.Body className=" pt-0">
               <div className="form-horizontal">
@@ -238,6 +212,7 @@ function CreateGRN() {
           </Card>
         </Col>
       </Row>
+      <br />
       <Row>
         <Col lg={12} xl={12} md={12} sm={12}>
           <Card className="box-shadow-0">
@@ -248,6 +223,9 @@ function CreateGRN() {
                   supplier_name={supplier_name}
                   supplier_address={supplier_address}
                   supplier_tp={supplier_tp}
+                  purchase_date={purchase_date}
+                  po_number={po_number}
+                  job_number={job_number}
                 />
               </div>
             </Card.Body>
@@ -257,6 +235,5 @@ function CreateGRN() {
     </div>
   );
 }
-
 
 export default CreateGRN;

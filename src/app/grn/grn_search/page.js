@@ -1,5 +1,6 @@
-"use client";
-import React from "react";
+"use client"; // Add this line at the top of the file
+
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Form, Modal, Row, Col } from "react-bootstrap";
 import apiBaseUrl from "../../../../utils/comp/ip";
@@ -55,6 +56,21 @@ function GRNSearch() {
     fetchData();
   }, []);
 
+  // Date formatting function
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    };
+    return new Date(dateString)
+      .toLocaleDateString(undefined, options)
+      .replace(",", "");
+  };
+
   return (
     <>
       <NavigationBar />
@@ -65,7 +81,7 @@ function GRNSearch() {
           </span>
         </div>
       </div>
-      <Row className=" row-sm p-2">
+      <Row className="row-sm p-2">
         <Col lg={12}>
           <table className="table">
             <thead className="table-dark">
@@ -85,13 +101,14 @@ function GRNSearch() {
                 <tr key={item.id_grn}>
                   <td>{item.id_grn}</td>
                   <td>{item.bill_no}</td>
-                  <td>{item.date_time}</td>
+                  <td>{formatDate(item.date_time)}</td>
                   <td>{item.supplier_name}</td>
                   <td>{item.tp_no}</td>
                   <td>{item.total_value}</td>
                   <td>{item.methods}</td>
                   <td>
                     <Button
+                      variant={item.cancel === 1 ? "danger" : "primary"}
                       onClick={() => handleShowModal("select", item.id_grn)}
                     >
                       <span className="glyphicon glyphicon-th-list"></span>
@@ -107,7 +124,7 @@ function GRNSearch() {
       <Modal
         show={select}
         onHide={() => viewDemoClose("select")}
-        className=" modal-xl"
+        className="modal-xl"
       >
         <SearchGRN setSelect={setSelect} id={idGRN} />
       </Modal>

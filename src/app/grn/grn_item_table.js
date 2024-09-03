@@ -20,6 +20,9 @@ export const GRNItemTable = ({
   supplier_name,
   supplier_address,
   supplier_tp,
+  purchase_date,
+  po_number,
+  job_number,
 }) => {
   const [tableData, setTableData] = useState([]);
   const [qData, setQData] = useState({
@@ -256,6 +259,9 @@ export const GRNItemTable = ({
       supplier_name,
       supplier_address,
       supplier_tp,
+      purchase_date,
+      po_number,
+      job_number,
       paymentMethods
     );
   };
