@@ -306,7 +306,7 @@ export const GRNItemTable = ({
         <Col sm={12} md={1} className="mg-t-10 mg-md-t-0">
           <FormGroup className="control-group form-group">
             <Form.Label className="form-label">Qnty Type</Form.Label>
-            <select
+            <Form.Control
               className="form-control"
               name="qnty_type"
               id="qnty_type"
@@ -314,14 +314,7 @@ export const GRNItemTable = ({
               onChange={changeHandler}
               value={qnty_type}
               disabled
-            >
-              <option value="piece">Piece</option>
-              <option value="inches">Inches</option>
-              <option value="cm">cm</option>
-              <option value="m">m</option>
-              <option value="L">L</option>
-              <option value="kg">kg</option>
-            </select>
+            />
           </FormGroup>
         </Col>
         {/* unit */}

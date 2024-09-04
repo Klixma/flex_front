@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Button,
@@ -11,6 +11,8 @@ import {
   InputGroup,
   OverlayTrigger,
   Tooltip,
+  Modal,
+  Table,
 } from "react-bootstrap";
 import apiBaseUrl from "../../../utils/comp/ip";
 import GRNItemTable from "./grn_item_table";
@@ -26,6 +28,7 @@ function CreateGRN() {
     po_number: "",
     job_number: "",
   });
+
   const {
     bill_no,
     supplier_name,
@@ -35,42 +38,70 @@ function CreateGRN() {
     po_number,
     job_number,
   } = data;
+
   const changeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
+  };
+
+  const [select, setSelect] = useState(false);
+  const [suppliers, setSuppliers] = useState([]);
+
+  const handleShowModal = () => {
+    setSelect(true);
+    fetchSuppliers();
+  };
+
+  const viewDemoClose = () => {
+    setSelect(false);
+  };
+
+  const fetchSuppliers = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/api/grn/suplers");
+      setSuppliers(response.data);
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
+
+  const selectSupplier = (supplier) => {
+    setData({
+      ...data,
+      supplier_name: supplier.supplier_name,
+      supplier_address: supplier.address,
+      supplier_tp: supplier.tp_no,
+    });
+    setSelect(false); // Close the modal after selection
   };
 
   const pressEnter = (e) => {
     const tFP = e.target.id;
     if (e.keyCode === 13) {
-      tFP == "bill_no"
+      tFP === "bill_no"
         ? document.getElementById("purchase_date").focus()
-        : tFP == "purchase_date"
+        : tFP === "purchase_date"
         ? document.getElementById("po_number").focus()
-        : tFP == "po_number"
+        : tFP === "po_number"
         ? document.getElementById("job_number").focus()
-        : tFP == "job_number"
+        : tFP === "job_number"
         ? document.getElementById("supplier_name").focus()
-        : tFP == "supplier_name"
+        : tFP === "supplier_name"
         ? document.getElementById("supplier_address").focus()
-        : tFP == "supplier_address"
+        : tFP === "supplier_address"
         ? document.getElementById("supplier_tp").focus()
-        : tFP == "supplier_tp"
+        : tFP === "supplier_tp"
         ? document.getElementById("item").focus()
-        : tFP == "phone_number"
-        ? document.getElementById("address").focus()
-        : tFP == "address"
-        ? document.getElementById("description").focus()
         : "";
     }
   };
 
-  React.useEffect(() => {
-    // Set focus on the text field
-    const textField = document.getElementById("bill_no") || ref.current;
+  useEffect(() => {
+    const textField = document.getElementById("bill_no");
     if (textField) {
       textField.focus();
     }
   }, []);
+
   return (
     <div>
       <NavigationBar />
@@ -93,7 +124,7 @@ function CreateGRN() {
                       name="bill_no"
                       placeholder="Bill No"
                       onChange={changeHandler}
-                      defaultValue={bill_no}
+                      value={bill_no}
                       onKeyDown={pressEnter}
                     />
                   </FormGroup>
@@ -111,7 +142,7 @@ function CreateGRN() {
                       name="purchase_date"
                       placeholder="Purchase Date"
                       onChange={changeHandler}
-                      defaultValue={purchase_date}
+                      value={purchase_date}
                       onKeyDown={pressEnter}
                     />
                   </FormGroup>
@@ -128,7 +159,7 @@ function CreateGRN() {
                       name="po_number"
                       placeholder="PO Number"
                       onChange={changeHandler}
-                      defaultValue={po_number}
+                      value={po_number}
                       onKeyDown={pressEnter}
                     />
                   </FormGroup>
@@ -144,7 +175,7 @@ function CreateGRN() {
                       name="job_number"
                       placeholder="Job Number"
                       onChange={changeHandler}
-                      defaultValue={job_number}
+                      value={job_number}
                       onKeyDown={pressEnter}
                     />
                   </FormGroup>
@@ -159,7 +190,15 @@ function CreateGRN() {
               <div className="form-horizontal">
                 {/* Supplier name text field */}
                 <FormGroup className="form-group">
-                  <Form.Label htmlFor="supplier_name">Supplier Name</Form.Label>
+                  <Form.Label htmlFor="supplier_name">
+                    Supplier Name{" "}
+                    <Button
+                      className="btn btn-primary btn-sm"
+                      onClick={handleShowModal}
+                    >
+                      Search Supplier
+                    </Button>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     className="form-control"
@@ -167,7 +206,7 @@ function CreateGRN() {
                     name="supplier_name"
                     placeholder="Supplier Name"
                     onChange={changeHandler}
-                    defaultValue={supplier_name}
+                    value={supplier_name}
                     onKeyDown={pressEnter}
                   />
                 </FormGroup>
@@ -183,7 +222,7 @@ function CreateGRN() {
                     name="supplier_address"
                     placeholder="Supplier Address"
                     onChange={changeHandler}
-                    defaultValue={supplier_address}
+                    value={supplier_address}
                     onKeyDown={pressEnter}
                   />
                 </FormGroup>
@@ -203,7 +242,7 @@ function CreateGRN() {
                     id="supplier_tp"
                     name="supplier_tp"
                     onChange={changeHandler}
-                    defaultValue={supplier_tp}
+                    value={supplier_tp}
                     onKeyDown={pressEnter}
                   />
                 </InputGroup>
@@ -232,6 +271,47 @@ function CreateGRN() {
           </Card>
         </Col>
       </Row>
+
+      {/* Modal to select supplier */}
+      <Modal show={select} onHide={viewDemoClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Supplier</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Phone Number</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {suppliers.map((supplier, index) => (
+                <tr key={index}>
+                  <td>{supplier.supplier_name}</td>
+                  <td>{supplier.address}</td>
+                  <td>{supplier.tp_no}</td>
+                  <td>
+                    <Button
+                      variant="primary"
+                      onClick={() => selectSupplier(supplier)}
+                    >
+                      Select
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={viewDemoClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
