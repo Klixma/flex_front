@@ -12,17 +12,17 @@ import axios from "axios";
 import apiBaseUrl from "../../../utils/comp/ip";
 import Savetable from "./comp/invoice_table";
 import fetchItems from "../item/comp/item_selecter_array";
-import SaveGRN from "./comp/save_invoice";
+import SaveInvoice from "./comp/save_invoice";
 import Select from "react-select";
+import Swal from "sweetalert2";
 
-export const GRNItemTable = ({
-  bill_no,
-  supplier_name,
-  supplier_address,
-  supplier_tp,
-  purchase_date,
-  po_number,
-  job_number,
+export const InvoiceItemTable = ({
+  id_dealer,
+  customer_name,
+  customer_address,
+  customer_tp,
+  note,
+  user_id,
 }) => {
   const [tableData, setTableData] = useState([]);
   const [qData, setQData] = useState({
@@ -39,10 +39,40 @@ export const GRNItemTable = ({
 
   const [items, setItems] = useState([]);
   const selectRef = useRef(null);
-  const [isCashPriceEnabled, setIsCashPriceEnabled] = useState(false);
-  const [isCheckPriceEnabled, setIsCheckPriceEnabled] = useState(false);
-  const [isCreditPriceEnabled, setIsCreditPriceEnabled] = useState(false);
   const [isClient, setIsClient] = useState(false);
+
+  const [subTotal, setSubTotal] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  const [totalDue, setTotalDue] = useState(0);
+
+  const [price, setPrice] = useState({
+    cash_price: 0,
+    check_price: 0,
+    credit_price: 0,
+  });
+  const { cash_price, check_price, credit_price } = price;
+
+  const changePrice = (e) => {
+    const { name, value } = e.target;
+
+    // Default value to 0 if it's falsy (null, undefined, or empty string)
+    const safeValue = value ? parseFloat(value) : 0;
+
+    setPrice((prevPrice) => {
+      const updatedPrice = { ...prevPrice, [name]: safeValue };
+
+      // Calculate the new credit price: totalDue - (cash_price + check_price)
+      const updatedCreditPrice =
+        totalDue -
+        (parseFloat(updatedPrice.cash_price) +
+          parseFloat(updatedPrice.check_price));
+
+      return {
+        ...updatedPrice,
+        credit_price: updatedCreditPrice >= 0 ? updatedCreditPrice : 0,
+      };
+    });
+  };
 
   // Fetch items when the component mounts
   useEffect(() => {
@@ -134,9 +164,28 @@ export const GRNItemTable = ({
         amount: qData["amount"],
       };
 
-      setTableData((prevTableData) => [...prevTableData, newItem]);
+      setTableData((prevTableData) => {
+        const updatedTableData = [...prevTableData, newItem];
 
-      // document.getElementById("item").focus();
+        // Calculate the new totalDue by summing the amounts in the table
+        const newTotalDue = updatedTableData.reduce(
+          (total, item) => total + parseFloat(item.amount),
+          0
+        );
+        setTotalDue(newTotalDue);
+
+        // Calculate the new credit price: totalDue - (cash_price + check_price)
+        const updatedCreditPrice =
+          newTotalDue - (parseFloat(cash_price) + parseFloat(check_price));
+        setPrice((prevPrice) => ({
+          ...prevPrice,
+          credit_price: updatedCreditPrice >= 0 ? updatedCreditPrice : 0,
+        }));
+
+        return updatedTableData;
+      });
+
+      // Reset form fields
       selectRef.current.focus();
       setQData({
         id_item: "",
@@ -179,7 +228,7 @@ export const GRNItemTable = ({
           ...prevState,
           id_item, // Assign the ID here
           c_unit: unitPrice,
-          unit: unitPrice,
+          unit: updatedUnit,
           qnty_type: fetchedData.unit_of_measure,
         }));
       } else if (response.status === 401) {
@@ -194,74 +243,43 @@ export const GRNItemTable = ({
     }
   };
 
-  // Handles checkbox state changes for payment methods
-  const handleCheckboxChange = (e) => {
-    const { id, checked } = e.target;
-    switch (id) {
-      case "cash_price_cbox":
-        setIsCashPriceEnabled(checked);
-        if (!checked) {
-          document.getElementById("cash_price").value = "";
-        }
-        break;
-      case "check_price_cbox":
-        setIsCheckPriceEnabled(checked);
-        if (!checked) {
-          document.getElementById("check_price").value = "";
-        }
-        break;
-      case "credit_price_cbox":
-        setIsCreditPriceEnabled(checked);
-        if (!checked) {
-          document.getElementById("credit_price").value = "";
-        }
-        break;
-      default:
-        break;
-    }
-  };
-
   // Prepares payment methods data
   const enabledPrices = () => {
     const paymentMethods = [];
 
-    if (document.getElementById("cash_price_cbox").checked) {
-      const price = parseFloat(document.getElementById("cash_price").value);
-      if (!isNaN(price)) {
-        paymentMethods.push({ method: "cash", price: price });
-      }
-    }
-
-    if (document.getElementById("check_price_cbox").checked) {
-      const price = parseFloat(document.getElementById("check_price").value);
-      if (!isNaN(price)) {
-        paymentMethods.push({ method: "check", price: price });
-      }
-    }
-
-    if (document.getElementById("credit_price_cbox").checked) {
-      const price = parseFloat(document.getElementById("credit_price").value);
-      if (!isNaN(price)) {
-        paymentMethods.push({ method: "credit", price: price });
-      }
-    }
+    paymentMethods.push({ method: "cash", price: cash_price });
+    paymentMethods.push({ method: "check", price: check_price });
+    paymentMethods.push({ method: "credit", price: credit_price });
 
     return paymentMethods;
   };
 
   // Handles form submission
   const handleSubmit = () => {
+    console.log(id_dealer);
+    // if (cash_price <= 0 || check_price <= 0) {
+    //   Swal.fire({
+    //     title: "Error!",
+    //     text: "Cash price and check price must be greater than 0.",
+    //     icon: "error",
+    //     confirmButtonText: "OK",
+    //   });
+    //   return;
+    // }
+
     const paymentMethods = enabledPrices();
 
-    SaveGRN(
-      bill_no,
+    SaveInvoice(
+      id_dealer,
+      customer_name,
+      customer_address,
+      customer_tp,
+      note,
+      user_id,
+      subTotal,
+      discount,
+      totalDue,
       tableData,
-      supplier_name,
-      supplier_address,
-      supplier_tp,
-      purchase_date,
-      po_number,
-      job_number,
       paymentMethods
     );
   };
@@ -319,23 +337,6 @@ export const GRNItemTable = ({
         </Col>
         {/* unit */}
         <Col sm={12} md={2} className="mg-t-10 mg-md-t-0">
-          <Form.Label className="form-label">Cost of unit</Form.Label>
-          <InputGroup className="input-group mb-3">
-            <InputGroup.Text className="input-group-text">Rs</InputGroup.Text>
-            <Form.Control
-              type="number"
-              className="form-control"
-              required
-              placeholder="0"
-              name="cost_of_unit"
-              id="cost_of_unit"
-              value={c_unit}
-              disabled
-            />
-          </InputGroup>
-        </Col>
-        {/* unit */}
-        <Col sm={12} md={2} className="mg-t-10 mg-md-t-0">
           <Form.Label className="form-label">Selling price of unit</Form.Label>
           <InputGroup className="input-group mb-3">
             <InputGroup.Text className="input-group-text">Rs</InputGroup.Text>
@@ -383,13 +384,16 @@ export const GRNItemTable = ({
 
       <Row>
         <Col lg={12} xl={12} md={12} sm={12}>
-          <Card className="box-shadow-0">
-            <Card.Body className=" pt-0">
+          <Card className="box-shadow-0 card text-white bg-secondary">
+            <Card.Body className="pt-0">
               <div className="form-horizontal mt-3">
                 <Row className="table-responsive deleted-table">
                   <Savetable
                     tableData={tableData}
                     handleDelete={handleDelete}
+                    setSubTotal={setSubTotal}
+                    setDiscount={setDiscount}
+                    setTotalDue={setTotalDue}
                   />
                 </Row>
               </div>
@@ -402,16 +406,7 @@ export const GRNItemTable = ({
           <Form.Label htmlFor="cash_price">Cash Price</Form.Label>
           <InputGroup className="input-group">
             <div className="input-group-text">
-              <label className="ckbox wd-16 mg-b-0">
-                <input
-                  className="mg-0"
-                  type="checkbox"
-                  id="cash_price_cbox"
-                  name="cash_price_cbox"
-                  onChange={handleCheckboxChange}
-                />
-                <span></span>
-              </label>
+              <label className="ckbox wd-16 mg-b-0">Rs:</label>
             </div>
             <Form.Control
               className="form-control"
@@ -419,7 +414,8 @@ export const GRNItemTable = ({
               id="cash_price"
               name="cash_price"
               type="number"
-              disabled={!isCashPriceEnabled}
+              min="0"
+              onChange={changePrice}
             />
           </InputGroup>
         </Col>
@@ -427,16 +423,7 @@ export const GRNItemTable = ({
           <Form.Label htmlFor="check_price">Check Price</Form.Label>
           <InputGroup className="input-group">
             <div className="input-group-text">
-              <label className="ckbox wd-16 mg-b-0">
-                <input
-                  className="mg-0"
-                  type="checkbox"
-                  id="check_price_cbox"
-                  name="check_price_cbox"
-                  onChange={handleCheckboxChange}
-                />
-                <span></span>
-              </label>
+              <label className="ckbox wd-16 mg-b-0">Rs:</label>
             </div>
             <Form.Control
               className="form-control"
@@ -444,7 +431,8 @@ export const GRNItemTable = ({
               id="check_price"
               name="check_price"
               type="number"
-              disabled={!isCheckPriceEnabled}
+              min="0"
+              onChange={changePrice}
             />
           </InputGroup>
         </Col>
@@ -452,16 +440,7 @@ export const GRNItemTable = ({
           <Form.Label htmlFor="credit_price">Credit Price</Form.Label>
           <InputGroup className="input-group">
             <div className="input-group-text">
-              <label className="ckbox wd-16 mg-b-0">
-                <input
-                  className="mg-0"
-                  type="checkbox"
-                  id="credit_price_cbox"
-                  name="credit_price_cbox"
-                  onChange={handleCheckboxChange}
-                />
-                <span></span>
-              </label>
+              <label className="ckbox wd-16 mg-b-0">Rs:</label>
             </div>
             <Form.Control
               className="form-control"
@@ -469,7 +448,8 @@ export const GRNItemTable = ({
               id="credit_price"
               name="credit_price"
               type="number"
-              disabled={!isCreditPriceEnabled}
+              value={price.credit_price} // Use price.credit_price
+              readOnly // Make it read-only since it will be calculated automatically
             />
           </InputGroup>
         </Col>
@@ -493,4 +473,4 @@ export const GRNItemTable = ({
   );
 };
 
-export default GRNItemTable;
+export default InvoiceItemTable;

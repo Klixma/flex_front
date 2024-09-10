@@ -91,8 +91,8 @@ function GRNSearch() {
                 <th>Date & time</th>
                 <th>Supplier Name</th>
                 <th>Supplier TP</th>
-                <th>Total</th>
-                <th>Payment Methods</th>
+                <th style={{ textAlign: "right" }}>Total</th>
+                <th style={{ textAlign: "right" }}>Payment Methods</th>
                 <th></th>
               </tr>
             </thead>
@@ -104,8 +104,10 @@ function GRNSearch() {
                   <td>{formatDate(item.date_time)}</td>
                   <td>{item.supplier_name}</td>
                   <td>{item.tp_no}</td>
-                  <td>{item.total_value}</td>
-                  <td>{item.methods}</td>
+                  <td style={{ textAlign: "right" }}>
+                    {Number(item.total_value).toFixed(2)}
+                  </td>
+                  <td style={{ textAlign: "right" }}>{item.methods}</td>
                   <td>
                     <Button
                       variant={item.cancel === 1 ? "danger" : "primary"}

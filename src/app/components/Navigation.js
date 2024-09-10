@@ -97,6 +97,34 @@ function NavigationBar() {
                 <a className="dropdown-item" href="../grn/grn_search">
                   Search GRN
                 </a>
+                <a className="dropdown-item" href="../grn/summary">
+                  GRN Summary
+                </a>
+              </div>
+            </li>
+
+            <li className="nav-item dropdown">
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                id="basic-nav-dropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                Invoice
+              </a>
+              <div
+                className="dropdown-menu dropdown-menu-end"
+                aria-labelledby="basic-nav-dropdown"
+              >
+                <a className="dropdown-item" href="../invoice">
+                  New Invoice
+                </a>
+                <a className="dropdown-item" href="../invoice/invoice_search">
+                  Search Invoice
+                </a>
               </div>
             </li>
             {/* <li className="nav-item dropdown">

@@ -2,36 +2,38 @@ import axios from "axios";
 import apiBaseUrl from "../../../../utils/comp/ip";
 import Swal from "sweetalert2";
 
-const SaveGRN = async (
-  bill_no,
+const SaveInvoice = async (
+  id_dealer,
+  customer_name,
+  customer_address,
+  customer_tp,
+  note,
+  user_id,
+  subTotal,
+  discount,
+  totalDue,
   tableData,
-  supplier_name,
-  supplier_address,
-  supplier_tp,
-  purchase_date,
-  po_number,
-  job_number,
   payment_methods
 ) => {
-  const user_id = localStorage.getItem("user_id");
-
   // Transform the tableDataGRN to match the desired structure
-  const grnItems = tableData.map((item) => ({
+  const invoice_item = tableData.map((item) => ({
     id_item: item.id_item, // Ensure this is correctly populated
     unit_price: item.unit,
     qnty: parseFloat(item.qnty),
   }));
 
   const payload = {
-    bill_no: bill_no,
-    supplier_name: supplier_name,
-    address: supplier_address,
-    tp_no: supplier_tp,
-    id_users: user_id,
-    purchase_date: purchase_date,
-    po_number: po_number,
-    job_number: job_number,
-    grn_item: grnItems,
+    id_dealer: id_dealer,
+    id_branch: "1",
+    sub_total: subTotal,
+    discount: discount,
+    total_due: totalDue,
+    notes: note,
+    create_user_id: user_id,
+    customer_name: customer_name,
+    address: customer_address,
+    tp: customer_tp,
+    invoice_item: invoice_item,
     payment_methods: payment_methods,
   };
 
@@ -40,7 +42,7 @@ const SaveGRN = async (
 
   try {
     const response = await axios.post(
-      `${apiBaseUrl}/grn/create`, // Make sure the endpoint is correct
+      `${apiBaseUrl}/invoice/create`, // Make sure the endpoint is correct
       payload,
       {
         headers: {
@@ -58,7 +60,7 @@ const SaveGRN = async (
         text: response.data.message,
       }).then(() => {
         // Redirect to the print page
-        window.location.href = `grn/grn_search`; // Adjust the redirect URL
+        window.location.href = `invoice/invoice_search`; // Adjust the redirect URL
       });
     }
   } catch (error) {
@@ -88,4 +90,4 @@ const SaveGRN = async (
   }
 };
 
-export default SaveGRN;
+export default SaveInvoice;

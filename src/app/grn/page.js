@@ -17,6 +17,7 @@ import {
 import apiBaseUrl from "../../../utils/comp/ip";
 import GRNItemTable from "./grn_item_table";
 import NavigationBar from "../components/Navigation";
+import Swal from "sweetalert2";
 
 function CreateGRN() {
   const [data, setData] = useState({
@@ -57,8 +58,16 @@ function CreateGRN() {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await axios.get("http://localhost:4000/api/grn/suplers");
-      setSuppliers(response.data);
+      const response = await axios.get(`${apiBaseUrl}/grn/suplers`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        setSuppliers(response.data);
+      } else if (response.status === 401) {
+        alert(response.data);
+      }
     } catch (error) {
       console.error("Error fetching suppliers:", error);
     }
